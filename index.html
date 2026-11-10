@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Online CSWIP 3.0 - Fillet Weld Inspection (WE304)</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-badge {
+            background-color: var(--bg-input);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            border: 1px solid var(--border);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .login-card h2 {
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 65px);
+            overflow: hidden;
+        }
+
+        .reference-panel {
+            width: 45%;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1.25rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .questions-panel {
+            width: 55%;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .section-box {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.4rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.6rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-input);
+            color: var(--accent);
+        }
+
+        .specimen-switcher {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .switch-btn {
+            flex: 1;
+            padding: 0.6rem;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .switch-btn.active {
+            background-color: var(--primary);
+            border-color: var(--accent);
+        }
+
+        .question-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .question-num {
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .concept-box {
+            background-color: rgba(56, 189, 248, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        .concept-box strong {
+            color: var(--accent);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .option-item {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .decision-grid {
+            display: flex;
+            gap: 0.75rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 0.75rem;
+        }
+
+        .decision-btn {
+            flex: 1;
+            padding: 0.55rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-input);
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .decision-btn.accept-selected {
+            background-color: rgba(34, 197, 94, 0.25);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .decision-btn.reject-selected {
+            background-color: rgba(239, 68, 68, 0.25);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .cert-box {
+            background-color: #f8fafc;
+            color: #0f172a;
+            border: 8px double #1e293b;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .cert-header {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #475569;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .cert-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+        }
+
+        .cert-body {
+            font-size: 1rem;
+            color: #334155;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .cert-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            border-bottom: 2px solid #cbd5e1;
+            display: inline-block;
+            padding: 0 1rem 0.2rem 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .cert-badge {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .cert-pass {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #22c55e;
+        }
+
+        .cert-fail {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        @media (max-width: 900px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            .reference-panel, .questions-panel {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-title">
+            <span>🛡️</span>
+            <span>Ujian Online CSWIP 3.0 Fillet Inspection (WE304)</span>
+        </div>
+        <div class="user-badge" id="user-display">Belum Login</div>
+    </header>
+
+    <!-- Modal Login -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="login-card">
+            <h2>Portal Ujian NDT Las</h2>
+            <p>Masukkan Nama & NIM Anda untuk membuka lembar soal ujian pemeriksaan visual fillet weld.</p>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="student-name">Nama Lengkap Mahasiswa</label>
+                    <input type="text" id="student-name" placeholder="Contoh: Asrafi" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-nim">NIM (Nomor Induk Mahasiswa)</label>
+                    <input type="text" id="student-nim" placeholder="Contoh: 3312301001" required>
+                </div>
+                <button type="submit" class="btn">Mulai Kerjakan Ujian</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Sertifikat Hasil Ujian -->
+    <div class="modal-overlay" id="result-modal" style="display:none;">
+        <div class="cert-box">
+            <div class="cert-header">Sertifikat Hasil Evaluasi Akademik</div>
+            <div class="cert-title">CSWIP 3.0 Fillet Weld Inspection</div>
+            
+            <div class="cert-body">
+                Diberikan kepada:
+                <div class="cert-name" id="cert-name-display">-</div>
+                <div style="font-size:0.9rem; color:#64748b;" id="cert-nim-display">NIM: -</div>
+                <div style="margin-top: 1rem; font-size:0.95rem;">
+                    Telah menyelesaikan evaluasi pengujian untuk <strong>Spesimen <span id="cert-specimen-display">-</span></strong>.
+                </div>
+            </div>
+
+            <div id="cert-status-badge" class="cert-badge"></div>
+
+            <div style="font-size:0.9rem; color:#475569; margin-bottom: 1.5rem;">
+                Skor Akhir: <strong id="cert-score-display" style="font-size:1.1rem; color:#0f172a;">-</strong> / 100<br>
+                <span>(Batas Minimum Kelulusan: 70%)</span>
+            </div>
+
+            <div id="sync-status" style="font-size:0.8rem; color:#64748b; margin-bottom: 1rem;">Menyimpan nilai ke Google Sheets...</div>
+
+            <button class="btn" style="max-width:200px; margin:0 auto;" onclick="closeResultModal()">Tutup & Selesai</button>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="app-container">
+        <div class="reference-panel">
+            <div>
+                <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:0.4rem;">PILIH SPESIMEN UJI:</label>
+                <div class="specimen-switcher">
+                    <div class="switch-btn active" id="btn-t11" onclick="switchSpecimen('T11')">Spesimen T11 (t = 6 mm)</div>
+                    <div class="switch-btn" id="btn-t13" onclick="switchSpecimen('T13')">Spesimen T13 (t = 8 mm)</div>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">A. Dimensi Terukur (Measured Dimensions)</div>
+                <table id="table-dimensions"></table>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">B. Peta Cacat (Imperfection Map)</div>
+                <table id="table-imperfections"></table>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">C. Kriteria Penerimaan CSWIP (TWI 10 Fillet)</div>
+                <table style="font-size:0.8rem;">
+                    <thead>
+                        <tr>
+                            <th>Jenis Cacat / Dimensi</th>
+                            <th>Kriteria Penerimaan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Leg Length</td><td>Min = t, Maks = t + 3 mm</td></tr>
+                        <tr><td>Actual Throat</td><td>Min = t x 0.7, Maks = t + 0.5 mm</td></tr>
+                        <tr><td>Undercut Kedalaman</td><td>Maks 10% dari t (Panjang maks 50 mm)</td></tr>
+                        <tr><td>Slag Inclusions</td><td>Akumulasi panjang maks 12 mm</td></tr>
+                        <tr><td>Porosity</td><td>Pori terbesar maks 1 mm Ø</td></tr>
+                        <tr><td>Lack of Fusion</td><td>Akumulasi total maks 15 mm</td></tr>
+                        <tr><td>Retak & Arc Strike</td><td><strong>TIDAK DIIZINKAN</strong></td></tr>
+                        <tr><td>Mechanical Damage</td><td>Kedalaman maks 1.5 mm, maks 1 area</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="questions-panel">
+            <div class="action-bar">
+                <div>
+                    <span style="font-size:0.85rem; color:var(--text-muted)">Batas Nilai Minimal Lulus:</span>
+                    <strong style="color:var(--warning); margin-left:0.4rem;">70% (70 / 100)</strong>
+                </div>
+                <button class="btn" style="width:auto; padding:0.5rem 1.25rem; font-size:0.85rem;" onclick="submitExam()">Kirim & Evaluasi Jawaban Ujian</button>
+            </div>
+
+            <div id="questions-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // URL GOOGLE APPS SCRIPT ANDA YANG BARU DAN TERINTEGRASI
+        const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyyoNTtut-4vOlmU2FqaEUG_r7B4XA0Cpnw7QQeDhBbumPSHG2COcPoFXxH-zbJ8EvA/exec";
+
+        const dataset = {
+            T11: {
+                t: 6,
+                dimensions: [
+                    { item: "Vertical Leg Length", max: "10.5 mm", min: "7.0 mm" },
+                    { item: "Horizontal Leg Length", max: "9.0 mm", min: "5.5 mm" },
+                    { item: "Actual Throat Thickness", max: "6.0 mm", min: "4.5 mm" }
+                ],
+                imperfections: [
+                    { pos: "5 mm", type: "Hard stamping", details: 'Identifikasi "T11".' },
+                    { pos: "40-48 mm", type: "Undercut", details: "Panjang 8 mm, kedalaman maks 1.2 mm." },
+                    { pos: "60 mm", type: "Mechanical damage", details: "Pukulan palu, kedalaman 0.5 mm." },
+                    { pos: "95 mm", type: "Cluster porosity", details: "Area 3x4 mm, pori terbesar 1.5 mm Ø." },
+                    { pos: "120-124 mm", type: "Slag inclusion", details: "Panjang 4 mm." },
+                    { pos: "145 mm", type: "Crack", details: "Crater crack 6 mm." },
+                    { pos: "175 mm", type: "Mechanical damage", details: "Bekas gerinda, kedalaman 0.8 mm." },
+                    { pos: "200-207 mm", type: "Undercut", details: "Panjang 7 mm, kedalaman maks 0.4 mm." },
+                    { pos: "230-242 mm", type: "Lack of sidewall fusion", details: "Panjang 12 mm." },
+                    { pos: "280 mm", type: "Mechanical damage", details: "Bekas pahat, kedalaman 0.6 mm." },
+                    { pos: "0-300 mm", type: "Arc strikes", details: "Tidak ada." }
+                ],
+                questions: [
+                    { id: 1, title: "Maximum Vertical Leg Length", concept: "Rumus Batas: Min = 6mm, Maks = 6+3 = 9mm. Data terukur maks = 10.5 mm.", options: ["6-7mm", "4-5mm", "2-3mm", "10-11mm"], correctVal: "10-11mm", correctDecision: "Reject" },
+                    { id: 2, title: "Minimum Vertical Leg Length", concept: "Rumus Batas: Min = 6mm, Maks = 9mm. Data terukur min = 7.0 mm.", options: ["3-4mm", "6.5-7.5mm", "8-9.5mm", "2-3mm"], correctVal: "6.5-7.5mm", correctDecision: "Accept" },
+                    { id: 3, title: "Maximum Horizontal Leg Length", concept: "Rumus Batas: Maks = 9 mm. Data terukur maks = 9.0 mm.", options: ["6-7mm", "4-5mm", "9-10mm", "11-12mm"], correctVal: "9-10mm", correctDecision: "Accept" },
+                    { id: 4, title: "Minimum Horizontal Leg Length", concept: "Rumus Batas: Min = 6 mm. Data terukur min = 5.5 mm.", options: ["3.5-4.5mm", "2-3mm", "5-6mm", "9-10mm"], correctVal: "5-6mm", correctDecision: "Reject" },
+                    { id: 5, title: "Maximum Actual Throat Thickness", concept: "Rumus Throat: Min = 4.2mm, Maks = 6.5mm. Data terukur maks = 6.0 mm.", options: ["2-3mm", "4-5mm", "6-7mm", "8-9mm"], correctVal: "6-7mm", correctDecision: "Accept" },
+                    { id: 6, title: "Minimum Actual Throat Thickness", concept: "Batas Min = 4.2 mm. Data terukur min = 4.5 mm.", options: ["2-3mm", "1-2mm", "4-5mm", "6-7mm"], correctVal: "4-5mm", correctDecision: "Accept" },
+                    { id: 7, title: "Lack of Fusion (Total Accumulative)", concept: "Batas Maks = 15 mm. Data = 12 mm.", options: ["10-15mm accumulative total", "20-30mm accumulative total", "None observed", "1-10mm accumulative total"], correctVal: "10-15mm accumulative total", correctDecision: "Accept" },
+                    { id: 8, title: "Arc Strikes", concept: "Batas CSWIP: Tidak diizinkan. Data = None observed.", options: ["3 total", "4 total", "None observed", "1 total"], correctVal: "None observed", correctDecision: "Accept" },
+                    { id: 9, title: "Mechanical Damage", concept: "Batas: Maks 1 lokasi. Data = 3 area.", options: ["4 Areas", "1 Area", "None observed", "3 Areas"], correctVal: "3 Areas", correctDecision: "Reject" },
+                    { id: 10, title: "Undercut Maximum Depth", concept: "Batas = 10% dari 6mm = 0.6 mm. Data = 1.2 mm.", options: ["1-2mm depth", "0.1-0.5mm depth", "None observed", "3-4mm depth"], correctVal: "1-2mm depth", correctDecision: "Reject" },
+                    { id: 11, title: "Undercut Total Length", concept: "Batas = Maks 50 mm. Data = 8mm + 7mm = 15 mm.", options: ["65-75mm in length", "10-16mm in length", "None", "20-25mm in length"], correctVal: "10-16mm in length", correctDecision: "Accept" },
+                    { id: 12, title: "Cluster Porosity", concept: "Area 3x4 = 12 mm². Pori terbesar 1.5 mm > 1 mm.", options: ["10-14mm²", "70-90mm²", "None observed", "120-150mm²"], correctVal: "10-14mm²", correctDecision: "Reject" },
+                    { id: 13, title: "Cracks Total", concept: "Batas: Tidak diizinkan. Data = 6 mm.", options: ["28-35mm total length", "22-27mm total length", "None observed", "5-10mm total length"], correctVal: "5-10mm total length", correctDecision: "Reject" },
+                    { id: 14, title: "Slag Inclusions Total", concept: "Batas = Maks 12 mm. Data = 4 mm.", options: ["10-15mm total length", "18-22mm total length", "None observed", "1-5mm total length"], correctVal: "1-5mm total length", correctDecision: "Accept" }
+                ]
+            },
+            T13: {
+                t: 8,
+                dimensions: [
+                    { item: "Vertical Leg Length", max: "10.5 mm", min: "7.5 mm" },
+                    { item: "Horizontal Leg Length", max: "11.5 mm", min: "9.5 mm" },
+                    { item: "Actual Throat Thickness", max: "7.0 mm", min: "6.5 mm" }
+                ],
+                imperfections: [
+                    { pos: "40 mm", type: "Arc strike", details: "1 arc strike." },
+                    { pos: "60-82 mm", type: "Undercut", details: "Panjang 22 mm, kedalaman 0.5 mm." },
+                    { pos: "110-124 mm", type: "Lack of sidewall fusion", details: "Panjang 14 mm." },
+                    { pos: "180-190 mm", type: "Lack of sidewall fusion", details: "Panjang 10 mm." },
+                    { pos: "150 mm", type: "Surface porosity", details: "2 pori: 2.0 mm Ø dan 0.8 mm Ø." },
+                    { pos: "205-211 mm", type: "Slag inclusion", details: "Panjang 6 mm." },
+                    { pos: "250-255 mm", type: "Slag inclusion", details: "Panjang 5 mm." },
+                    { pos: "270 mm", type: "Mechanical damage", details: "Kedalaman 1.0 mm, dihaluskan." },
+                    { pos: "0-300 mm", type: "Cracks", details: "Tidak ada." }
+                ],
+                questions: [
+                    { id: 1, title: "Maximum Vertical Leg Length", concept: "Batas: Min = 8mm, Maks = 11mm. Data terukur maks = 10.5 mm.", options: ["10-11mm", "7-8mm", "4-5mm", "12-13mm"], correctVal: "10-11mm", correctDecision: "Accept" },
+                    { id: 2, title: "Minimum Vertical Leg Length", concept: "Batas Min = 8 mm. Data terukur min = 7.5 mm.", options: ["3-4mm", "5-6mm", "7-8mm", "9-10mm"], correctVal: "7-8mm", correctDecision: "Reject" },
+                    { id: 3, title: "Maximum Horizontal Leg Length", concept: "Batas Maks = 11 mm. Data terukur maks = 11.5 mm.", options: ["6-7mm", "8-9mm", "4-5mm", "11-12mm"], correctVal: "11-12mm", correctDecision: "Reject" },
+                    { id: 4, title: "Minimum Horizontal Leg Length", concept: "Batas Min = 8 mm. Data terukur min = 9.5 mm.", options: ["3-4mm", "5-6mm", "7-8mm", "9-10mm"], correctVal: "9-10mm", correctDecision: "Accept" },
+                    { id: 5, title: "Maximum Actual Throat Thickness", concept: "Rumus Throat (t=8): Min = 5.6mm, Maks = 8.5mm. Data = 7.0 mm.", options: ["4.5-5.5mm", "6.5-7.5mm", "3-4mm", "8-9.5mm"], correctVal: "6.5-7.5mm", correctDecision: "Accept" },
+                    { id: 6, title: "Minimum Actual Throat Thickness", concept: "Batas Min = 5.6 mm. Data terukur min = 6.5 mm.", options: ["1-2mm", "8-9mm", "3-4mm", "6-7mm"], correctVal: "6-7mm", correctDecision: "Accept" },
+                    { id: 7, title: "Lack of Fusion (Total)", concept: "Batas = 15 mm. Data = 14mm + 10mm = 24 mm.", options: ["10-15mm accumulative total", "20-30mm accumulative total", "None observed", "1-9mm accumulative total"], correctVal: "20-30mm accumulative total", correctDecision: "Reject" },
+                    { id: 8, title: "Arc Strikes", concept: "Batas: Tidak diizinkan. Data = 1 lokasi.", options: ["3 total", "4 total", "None observed", "1 total"], correctVal: "1 total", correctDecision: "Reject" },
+                    { id: 9, title: "Mechanical Damage", concept: "Batas: Maks 1 lokasi <= 1.5mm. Data = 1 area (1.0 mm).", options: ["2 Areas", "1 Area", "None observed", "3 Areas"], correctVal: "1 Area", correctDecision: "Accept" },
+                    { id: 10, title: "Undercut Maximum Depth", concept: "Batas = 10% dari 8mm = 0.8 mm. Data = 0.5 mm.", options: ["1-2mm depth", "0-0.5mm depth", "None observed", "3-4mm depth"], correctVal: "0-0.5mm depth", correctDecision: "Accept" },
+                    { id: 11, title: "Undercut Total Length", concept: "Batas = Maks 50 mm. Data = 22 mm.", options: ["55-100mm in length", "10-16mm in length", "None", "20-25mm in length"], correctVal: "20-25mm in length", correctDecision: "Accept" },
+                    { id: 12, title: "Porosity (Largest Pore)", concept: "Batas = Maks 1 mm Ø. Data = 2.0 mm Ø.", options: ["2-2.5mm diameter", "0.5mm diameter", "None observed", "1-1.5mm diameter"], correctVal: "2-2.5mm diameter", correctDecision: "Reject" },
+                    { id: 13, title: "Cracks Total", concept: "Batas: Tidak diizinkan. Data = None observed.", options: ["28-35mm total length", "22-27mm total length", "None observed", "5-10mm total length"], correctVal: "None observed", correctDecision: "Accept" },
+                    { id: 14, title: "Slag Inclusions Total", concept: "Batas = Maks 12 mm. Data = 6mm + 5mm = 11 mm.", options: ["10-15mm total length", "18-22mm total length", "None observed", "1-5mm total length"], correctVal: "10-15mm total length", correctDecision: "Accept" }
+                ]
+            }
+        };
+
+        let currentSpecimen = 'T11';
+        let studentData = { name: '', nim: '' };
+        let userAnswers = {};
+        let shuffledQuestions = { T11: [], T13: [] };
+
+        // Algoritma Pengacak Soal (Fisher-Yates Shuffle)
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('student-name').value.trim();
+            const nim = document.getElementById('student-nim').value.trim();
+
+            if (!name || !nim) {
+                alert("Harap isi Nama dan NIM Anda!");
+                return;
+            }
+
+            studentData = { name, nim };
+            document.getElementById('user-display').innerText = `${name} (${nim})`;
+            document.getElementById('login-modal').style.display = 'none';
+
+            // Acak urutan soal saat login dilakukan untuk mencegah kecurangan
+            shuffledQuestions.T11 = shuffleArray(dataset.T11.questions);
+            shuffledQuestions.T13 = shuffleArray(dataset.T13.questions);
+
+            renderApp();
+        }
+
+        function switchSpecimen(key) {
+            currentSpecimen = key;
+            document.getElementById('btn-t11').classList.toggle('active', key === 'T11');
+            document.getElementById('btn-t13').classList.toggle('active', key === 'T13');
+            renderApp();
+        }
+
+        function renderApp() {
+            const data = dataset[currentSpecimen];
+            const questionsToRender = shuffledQuestions[currentSpecimen].length > 0 
+                ? shuffledQuestions[currentSpecimen] 
+                : data.questions;
+
+            // Render Dimensi Terukur
+            let dimHtml = `<thead><tr><th>Item Dimensi</th><th>Maksimum</th><th>Minimum</th></tr></thead><tbody>`;
+            data.dimensions.forEach(d => dimHtml += `<tr><td><strong>${d.item}</strong></td><td>${d.max}</td><td>${d.min}</td></tr>`);
+            dimHtml += `</tbody>`;
+            document.getElementById('table-dimensions').innerHTML = dimHtml;
+
+            // Render Peta Cacat
+            let impHtml = `<thead><tr><th>Jarak</th><th>Ketidaksempurnaan</th><th>Detail</th></tr></thead><tbody>`;
+            data.imperfections.forEach(i => impHtml += `<tr><td>${i.pos}</td><td><strong>${i.type}</strong></td><td>${i.details}</td></tr>`);
+            impHtml += `</tbody>`;
+            document.getElementById('table-imperfections').innerHTML = impHtml;
+
+            // Render Soal Teracak
+            let qHtml = '';
+            questionsToRender.forEach((q, index) => {
+                const displayIndex = index + 1; // Nomor Tampilan 1-14
+                const ansVal = userAnswers[`${currentSpecimen}_${q.id}_val`];
+                const ansDec = userAnswers[`${currentSpecimen}_${q.id}_dec`];
+
+                qHtml += `
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-num">Soal #${displayIndex}</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted)">Spesimen ${currentSpecimen}</span>
+                    </div>
+                    <div class="question-text">${q.title}</div>
+                    
+                    <div class="concept-box">
+                        <strong>💡 Kriteria & Konsep Acuan Ujian:</strong><br>${q.concept}
+                    </div>
+
+                    <div style="font-size:0.85rem; color:var(--accent); margin-bottom:0.4rem; font-weight:600;">1. Nilai Rentang:</div>
+                    <div class="options-grid">
+                        ${q.options.map(opt => `
+                            <label class="option-item">
+                                <input type="radio" name="q_${currentSpecimen}_${q.id}_val" value="${opt}" 
+                                    ${ansVal === opt ? 'checked' : ''} 
+                                    onchange="saveAnswer(${q.id}, 'val', '${opt}')">
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+
+                    <div style="font-size:0.85rem; color:var(--accent); margin-bottom:0.4rem; font-weight:600;">2. Keputusan Inspektur:</div>
+                    <div class="decision-grid">
+                        <div class="decision-btn ${ansDec === 'Accept' ? 'accept-selected' : ''}" onclick="saveAnswer(${q.id}, 'dec', 'Accept')">✔ ACCEPT</div>
+                        <div class="decision-btn ${ansDec === 'Reject' ? 'reject-selected' : ''}" onclick="saveAnswer(${q.id}, 'dec', 'Reject')">✖ REJECT</div>
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('questions-container').innerHTML = qHtml;
+        }
+
+        function saveAnswer(qId, type, val) {
+            userAnswers[`${currentSpecimen}_${qId}_${type}`] = val;
+            renderApp();
+        }
+
+        function submitExam() {
+            const data = dataset[currentSpecimen];
+            let correctCount = 0;
+            let totalQuestions = data.questions.length;
+
+            data.questions.forEach(q => {
+                const ansVal = userAnswers[`${currentSpecimen}_${q.id}_val`];
+                const ansDec = userAnswers[`${currentSpecimen}_${q.id}_dec`];
+
+                if (ansVal === q.correctVal && ansDec === q.correctDecision) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / totalQuestions) * 100);
+            const isPassed = score >= 70;
+            const statusText = isPassed ? 'LULUS (PASS)' : 'TIDAK LULUS (FAIL)';
+
+            // Tampilkan Data pada Modal Sertifikat / Nilai Akhir
+            document.getElementById('cert-name-display').innerText = studentData.name;
+            document.getElementById('cert-nim-display').innerText = `NIM: ${studentData.nim}`;
+            document.getElementById('cert-specimen-display').innerText = currentSpecimen;
+            document.getElementById('cert-score-display').innerText = score;
+
+            const badge = document.getElementById('cert-status-badge');
+            badge.className = `cert-badge ${isPassed ? 'cert-pass' : 'cert-fail'}`;
+            badge.innerText = statusText;
+
+            document.getElementById('result-modal').style.display = 'flex';
+
+            // Kirim otomatis Nama, NIM, dan Nilai ke Google Sheets
+            sendResultToGoogleSheets(studentData.name, studentData.nim, currentSpecimen, score, statusText);
+        }
+
+        function sendResultToGoogleSheets(nama, nim, spesimen, skor, status) {
+            const syncElement = document.getElementById('sync-status');
+            
+            if (!GOOGLE_SHEET_WEB_APP_URL) {
+                if (syncElement) syncElement.innerText = "URL Google Sheets belum dikonfigurasi.";
+                return;
+            }
+
+            if (syncElement) syncElement.innerText = "Mengirim nilai ke Google Sheets...";
+
+            const payload = {
+                timestamp: new Date().toLocaleString('id-ID'),
+                nama: nama,
+                nim: nim,
+                spesimen: spesimen,
+                skor: skor,
+                status: status
+            };
+
+            fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                if (syncElement) {
+                    syncElement.innerText = "✅ Data nilai berhasil tersimpan di Google Sheets!";
+                    syncElement.style.color = "#22c55e";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (syncElement) {
+                    syncElement.innerText = "⚠️ Gagal mengirim data ke Google Sheets.";
+                    syncElement.style.color = "#ef4444";
+                }
+            });
+        }
+
+        function closeResultModal() {
+            document.getElementById('result-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
